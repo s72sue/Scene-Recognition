@@ -55,7 +55,8 @@ net.blobs['data'].reshape(50,  # batch size
                            227, 227)  # image size is 227x227
 
 # load an image and perform the preprocessing
-image = caffe.io.load_image(caffe_root + 'examples/images/cat.jpg')
+#image = caffe.io.load_image(caffe_root + 'examples/images/cat.jpg')
+image = caffe.io.load_image(caffe_root + 'scene/placesCNN_upgraded/testSet_resize/fffd911a0e4dcb072b417882d6106b9f.jpg')
 transformed_image = transformer.preprocess('data', image)
 #print image
 plt.imshow(image)
@@ -81,7 +82,7 @@ print 'output label: ', labels[output_prob.argmax()]
 # Looking at the top five predictions from softmax output
 top_inds = output_prob.argsort()[::-1][:5 ]  #reverse sort and take five largest items
 
-print 'probabilities and labels:', zip(output_prob[top_inds], labels[top_inds])
+print 'probabilities and labels:\n', zip(output_prob[top_inds], labels[top_inds])
 
 
 # Switching to GPU mode to run the conv net
@@ -98,4 +99,50 @@ caffe.set_mode_gpu()
 GPUstart_time = time.clock()
 net.forward()
 print "Execution time in GPU mode: ", time.clock() - GPUstart_time, "seconds"
+
+
+## Look at some of the parameters and intermediate activations
+# Obtain the activation shapes for each layer. They should have the
+# form (batch_size, channel_dim, height, width).
+
+# look at the output shape for each layer
+print "Activation Shapes"
+for layer_name, blob in net.blobs.iteritems():
+    print layer_name + "  " + str(blob.data.shape)
+
+
+# look at the parameter shapes. They should have the form
+# (output_channels, input_channels, filter_height, filter_width) 
+# for the weights and 1-dimensional shape (output_channels) for the biases.
+print "Parameter Shapes"
+for layer_name, param in net.params.iteritems():
+    print layer_name + '\t' + str(param[0].data.shape), str(param[1].data.shape)
+
+
+## Visualize sets of rectangular heat maps
+# data is four dimensional
+
+def vis_4data(data):
+    """
+    Parameters:
+    data: An array of shape (n, height, width, 3) or (n, height, width)
+    Output:
+    A grid of size approx sqrt(n) by sqrt(n) containing each (height, width)
+    """
+
+    # Step1: normalize data for display
+    n = int(np.ceit(np.sqrt(data.shape[0])))
+    
+
+# Comput the accuracy 
+accuracy = 0
+num_iterations = 10
+for i in range(num_iterations):
+    # one iteration, images=batch size
+    outputs = net.forward()
+    accuracy += net.blobs['accuracy-top5'].data
+    print outputs
+print ('############################################################') 
+avg_accuracy = accuracy/num_iterations
+print "Accuracy = ", avg_accuracy
 
