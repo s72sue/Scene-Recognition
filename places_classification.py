@@ -55,8 +55,8 @@ net.blobs['data'].reshape(50,  # batch size
                            227, 227)  # image size is 227x227
 
 # load an image and perform the preprocessing
-#image = caffe.io.load_image(caffe_root + 'examples/images/cat.jpg')
-image = caffe.io.load_image(caffe_root + 'scene/placesCNN_upgraded/testSet_resize/fffd911a0e4dcb072b417882d6106b9f.jpg')
+image = caffe.io.load_image(caffe_root + 'examples/images/cat.jpg')
+#mage = caffe.io.load_image(caffe_root + 'scene/placesCNN_upgraded/testSet_resize/fffd911a0e4dcb072b417882d6106b9f.jpg')
 transformed_image = transformer.preprocess('data', image)
 #print image
 plt.imshow(image)
@@ -131,17 +131,20 @@ def vis_4data(data):
     """
 
     # Step1: normalize data for display
-    n = int(np.ceit(np.sqrt(data.shape[0])))
+    n = int(np.ceil(np.sqrt(data.shape[0])))
     padding = (((0, n ** 2 - data.shape[0]),
-               (0, 1), (0, 1))                 # adding some space between filters
+        (0, 1), (0, 1))                 # adding some space between filters
                + ((0, 0),) * (data.ndim - 3))  # the last dimension (if there is one) shouldn't be padded
     data = np.pad(data, padding, mode='constant', constant_values=1)  # pad with ones (white)
     
     # tiling the filters into an image
     data = data.reshape((n, n) + data.shape[1:]).transpose((0, 2, 1, 3) + tuple(range(4, data.ndim + 1)))
     data = data.reshape((n * data.shape[1], n * data.shape[3]) + data.shape[4:])
-    
+     
+    fig = plt.figure()
+    fig.patch.set_facecolor('white')
     plt.imshow(data); plt.axis('off')
+    plt.show()
 
 
 # Visualize the filter of conv1 i.e. the first layer
@@ -151,11 +154,11 @@ vis_4data(filters.transpose(0, 2, 3, 1))
 
 # Visualize the output of conv1 (rectified responses of filters, first 36 only)
 output = net.blobs['conv1'].data[0, :36]
-vis_square(output)
+vis_4data(output)
 
 # Visualize the output of pool5 i.e., the fifth layer
 output = net.blobs['pool5'].data[0]
-vis_square(output)
+vis_4data(output)
 
 # Visualize the output of the fully connected rectified layer fc6
 # Plt the output values and the histogram of the positive values
@@ -164,14 +167,15 @@ plt.subplot(2, 1, 1)
 plt.plot(output.flat)
 plt.subplot(2, 1, 2)
 plt.hist(output.flat[output.flat > 0], bins=100)
+plt.show()
 
 # Visualize the final probability output
 feat = net.blobs['prob'].data[0]
 plt.figure(figsize=(15, 3))
 plt.plot(feat.flat)
+plt.show()
 
-
-# Comput the accuracy 
+# Compute the accuracy 
 accuracy = 0
 num_iterations = 10
 for i in range(num_iterations):
