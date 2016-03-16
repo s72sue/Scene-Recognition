@@ -132,7 +132,44 @@ def vis_4data(data):
 
     # Step1: normalize data for display
     n = int(np.ceit(np.sqrt(data.shape[0])))
+    padding = (((0, n ** 2 - data.shape[0]),
+               (0, 1), (0, 1))                 # adding some space between filters
+               + ((0, 0),) * (data.ndim - 3))  # the last dimension (if there is one) shouldn't be padded
+    data = np.pad(data, padding, mode='constant', constant_values=1)  # pad with ones (white)
     
+    # tiling the filters into an image
+    data = data.reshape((n, n) + data.shape[1:]).transpose((0, 2, 1, 3) + tuple(range(4, data.ndim + 1)))
+    data = data.reshape((n * data.shape[1], n * data.shape[3]) + data.shape[4:])
+    
+    plt.imshow(data); plt.axis('off')
+
+
+# Visualize the filter of conv1 i.e. the first layer
+# the parameters are a list of [weights, biases]
+filters = net.params['conv1'][0].data
+vis_4data(filters.transpose(0, 2, 3, 1))
+
+# Visualize the output of conv1 (rectified responses of filters, first 36 only)
+output = net.blobs['conv1'].data[0, :36]
+vis_square(output)
+
+# Visualize the output of pool5 i.e., the fifth layer
+output = net.blobs['pool5'].data[0]
+vis_square(output)
+
+# Visualize the output of the fully connected rectified layer fc6
+# Plt the output values and the histogram of the positive values
+output = net.blobs['fc6'].data[0]
+plt.subplot(2, 1, 1)
+plt.plot(output.flat)
+plt.subplot(2, 1, 2)
+plt.hist(output.flat[output.flat > 0], bins=100)
+
+# Visualize the final probability output
+feat = net.blobs['prob'].data[0]
+plt.figure(figsize=(15, 3))
+plt.plot(feat.flat)
+
 
 # Comput the accuracy 
 accuracy = 0
