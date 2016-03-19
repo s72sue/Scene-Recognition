@@ -50,7 +50,7 @@ transformer.set_channel_swap('data', (2,1,0))
 
 ## CPU classification
 # set the size of the input if different from the default
-net.blobs['data'].reshape(50,  # batch size
+net.blobs['data'].reshape(1,  # batch size
                            3,  # 3-channel BGR images
                            227, 227)  # image size is 227x227
 
@@ -149,7 +149,7 @@ def vis_4data_original(data):
     plt.imshow(data); plt.axis('off')
     plt.show()
 
-def vis_4data (data, padsize=1, padval=0):
+def vis_4data (data, padsize=1, padval=0, title="Image"):
     """
     Parameters:
     data: An array of shape (n, height, width, 3) or (n, height, width)
@@ -170,31 +170,58 @@ def vis_4data (data, padsize=1, padval=0):
     data = data.reshape((n, n) + data.shape[1:]).transpose((0, 2, 1, 3) + tuple(range(4, data.ndim + 1)))
     data = data.reshape((n * data.shape[1], n * data.shape[3]) + data.shape[4:])
 
-    showimage(data)
+    plt.figure()
+    plt.imshow(data)
+    plt.axis('off')
+    plt.title(title)
+    #plt.show()
 
 # Visualize the filter of conv1 i.e. the first layer
 # the parameters are a list of [weights, biases]
+# CONV1 FILTERS
 filters = net.params['conv1'][0].data
-vis_4data(filters.transpose(0, 2, 3, 1))
+vis_4data(filters.transpose(0, 2, 3, 1), title="CONV1 FILTERS")
 
 # Visualize the output of conv1 (rectified responses of filters, first 36 only)
+# CONV1 OUTPUT
 output = net.blobs['conv1'].data[0, :36]
-vis_4data(output, padval=1)
+vis_4data(output, padval=1, title="CONV1 OUPUT")
+
+# CONV2 FILTERS (FIRST 48)
+filters = net.params['conv2'][0].data
+vis_4data(filters[:48].reshape(48**2, 5, 5), title="CONV2 FILTERS - each channel is shown separetely so that each filter is a row")
+
+# CONV2 OUTPUT
+output = net.blobs['conv2'].data[0, :36]
+vis_4data(output, padval=1, title="CONV2 OUTPUT")
+
+# CONV3 OUPUT
+output = net.blobs['conv3'].data[0]
+vis_4data(output, padval=0.5, title="CONV3 OUTPUT - all 384 channels")
+
+# CONV4 OUTPUT
+output = net.blobs['conv4'].data[0]
+vis_4data(output, padval=0.5, title="CONV4 OUTPUT - all 384 channels")
+
+# CONV5 OUTPUT
+output = net.blobs['conv5'].data[0]
+vis_4data(output, padval=0.5, title="CONV5 OUTPUT - all 256 channels")
+
 
 #Filters of conv5
-filters = net.params['conv5'][0].data
-vis_4data(filters.transpose(0,3,2,1))
+filters = net.params['conv5'][0].data[0, 50:114]
+vis_4data(filters, padval=1, title="FILTERS OF CONV5 - index 50 - 114")
 
 
 # Visualize the output of conv5 (rectified responses of filters, first 36 only)
 output = net.blobs['conv5'].data[0, :36]
-print "DIMENSIONS:, ", output.shape
-vis_4data(output)
+vis_4data(output, padval=1, title="CONV5 OUTPUT = first 36 channels only")
 
 
+# POOL5 OUTPUT
 # Visualize the output of pool5 i.e., the fifth layer
 output = net.blobs['pool5'].data[0]
-vis_4data(output)
+vis_4data(output, padval=1, title="POOL5 OUTPUT")
 
 # Visualize the output of the fully connected rectified layer fc6
 # Plt the output values and the histogram of the positive values
@@ -210,6 +237,7 @@ plt.show()
 feat = net.blobs['prob'].data[0]
 plt.figure(figsize=(15, 3))
 plt.plot(feat.flat)
+plt.title("Final probability output")
 plt.show()
 
 """
