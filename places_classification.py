@@ -240,6 +240,33 @@ plt.plot(feat.flat)
 plt.title("Final probability output")
 plt.show()
 
+v = np.zeros((13, 13))
+
+m = 0
+for x in xrange(0, 13):
+    for y in xrange(0, 13):
+        s = 0
+        for filter_n in xrange(0, 255):
+            s += net.blobs['conv5'].data[0][filter_n][x][y]
+        m = max(s, m)
+        v[x][y] = s
+
+for x in xrange(0, 13):
+    for y in xrange(0, 13):
+        v[x][y] /= m
+
+plt.figure()
+plt.imshow(v)
+plt.show()
+
+plt.figure()
+plt.imshow(net.blobs['conv5'].data[0][240])
+plt.show()
+
+plt.figure()
+plt.imshow(net.blobs['pool5'].data[0][240])
+plt.show()
+
 """
 # Compute the accuracy 
 accuracy = 0
