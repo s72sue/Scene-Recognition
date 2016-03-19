@@ -125,7 +125,7 @@ for layer_name, param in net.params.iteritems():
 # take an array of shape (n, height, width) or (n, height, width, channel)
 # and Visualize each (height, width) in a grid of size approx sqrt(n) x sqrt(n).
 # data is four dimensional
-def vis_4data(data):
+def vis_4data_original(data):
     """
     Parameters:
     data: An array of shape (n, height, width, 3) or (n, height, width)
@@ -149,7 +149,28 @@ def vis_4data(data):
     plt.imshow(data); plt.axis('off')
     plt.show()
 
+def vis_4data (data, padsize=1, padval=0):
+    """
+    Parameters:
+    data: An array of shape (n, height, width, 3) or (n, height, width)
+    padsize: size of padding to be used
+    padval: values to use for padding
+    Output:
+    A grid of size approx sqrt(n) by sqrt(n) containing each (height, width)
+    """
+    data -= data.min()
+    data /= data.max()
 
+    # force the number of filters to be square
+    n = int(np.ceil(np.sqrt(data.shape[0])))
+    padding = ((0, n ** 2 - data.shape[0]), (0, padsize), (0, padsize)) + ((0, 0),) * (data.ndim - 3)
+    data = np.pad(data, padding, mode='constant', constant_values=(padval, padval))
+
+    # tile the filters into an image
+    data = data.reshape((n, n) + data.shape[1:]).transpose((0, 2, 1, 3) + tuple(range(4, data.ndim + 1)))
+    data = data.reshape((n * data.shape[1], n * data.shape[3]) + data.shape[4:])
+
+    showimage(data)
 
 # Visualize the filter of conv1 i.e. the first layer
 # the parameters are a list of [weights, biases]
