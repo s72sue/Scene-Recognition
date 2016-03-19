@@ -55,8 +55,9 @@ net.blobs['data'].reshape(50,  # batch size
                            227, 227)  # image size is 227x227
 
 # load an image and perform the preprocessing
-image = caffe.io.load_image(caffe_root + 'examples/images/cat.jpg')
-#mage = caffe.io.load_image(caffe_root + 'scene/placesCNN_upgraded/testSet_resize/fffd911a0e4dcb072b417882d6106b9f.jpg')
+#image = caffe.io.load_image(caffe_root + 'examples/images/cat.jpg')
+#image = caffe.io.load_image(caffe_root + 'scene/placesCNN_upgraded/testSet_resize/fffd911a0e4dcb072b417882d6106b9f.jpg')
+image = caffe.io.load_image(caffe_root + 'examples/Scene-Recognition/bedroom.jpg')
 transformed_image = transformer.preprocess('data', image)
 #print image
 plt.imshow(image)
@@ -119,9 +120,11 @@ for layer_name, param in net.params.iteritems():
     print layer_name + '\t' + str(param[0].data.shape), str(param[1].data.shape)
 
 
-## Visualize sets of rectangular heat maps
-# data is four dimensional
 
+## Visualize sets of rectangular heat maps
+# take an array of shape (n, height, width) or (n, height, width, channel)
+# and Visualize each (height, width) in a grid of size approx sqrt(n) x sqrt(n).
+# data is four dimensional
 def vis_4data(data):
     """
     Parameters:
@@ -147,6 +150,7 @@ def vis_4data(data):
     plt.show()
 
 
+
 # Visualize the filter of conv1 i.e. the first layer
 # the parameters are a list of [weights, biases]
 filters = net.params['conv1'][0].data
@@ -154,7 +158,18 @@ vis_4data(filters.transpose(0, 2, 3, 1))
 
 # Visualize the output of conv1 (rectified responses of filters, first 36 only)
 output = net.blobs['conv1'].data[0, :36]
+vis_4data(output, padval=1)
+
+#Filters of conv5
+filters = net.params['conv5'][0].data
+vis_4data(filters.transpose(0,3,2,1))
+
+
+# Visualize the output of conv5 (rectified responses of filters, first 36 only)
+output = net.blobs['conv5'].data[0, :36]
+print "DIMENSIONS:, ", output.shape
 vis_4data(output)
+
 
 # Visualize the output of pool5 i.e., the fifth layer
 output = net.blobs['pool5'].data[0]
@@ -167,6 +182,7 @@ plt.subplot(2, 1, 1)
 plt.plot(output.flat)
 plt.subplot(2, 1, 2)
 plt.hist(output.flat[output.flat > 0], bins=100)
+plt.title("Output of fc6")
 plt.show()
 
 # Visualize the final probability output
@@ -175,6 +191,7 @@ plt.figure(figsize=(15, 3))
 plt.plot(feat.flat)
 plt.show()
 
+"""
 # Compute the accuracy 
 accuracy = 0
 num_iterations = 10
@@ -186,4 +203,5 @@ for i in range(num_iterations):
 print ('############################################################') 
 avg_accuracy = accuracy/num_iterations
 print "Accuracy = ", avg_accuracy
+"""
 
