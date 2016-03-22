@@ -77,7 +77,7 @@ plt.show()
 directory = caffe_root + 'scene/placesCNN_upgraded/testSet_resize' 
 category_list = []
 output_list = []  #avg output from all images
-sigma = np.arange(0, 15, 2)
+sigma = np.arange(0, 13, 0.5)
 i = 0
 for filename in os.listdir(directory):
     image_array = np.array(misc.imread(directory + '/' + filename))
