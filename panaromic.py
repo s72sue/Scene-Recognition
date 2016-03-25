@@ -7,6 +7,7 @@ from scipy import misc
 from scipy import ndimage
 from PIL import Image
 import cPickle as pickle
+from scipy.stats.stats import pearsonr
 import os
 
 # set the defaults for display
@@ -68,16 +69,18 @@ net.blobs['data'].reshape(1,  # batch size
 # of the panaromic scene
 left_dir = caffe_root + 'examples/panaromic_db/panleft_db/' 
 right_dir = caffe_root + 'examples/panaromic_db/panright_db/' 
+full_dir = caffe_root + 'examples/panaromic_db/'
 
 # lists to store avg activations for eight layers
 left_activations = []
 right_activations = []
+full_activations = []
 
 i = 0
 # go over the left image segments of panaromic scenes
 for filename in os.listdir(left_dir):
 
-    #filename = 'creek1_left.jpg'
+    #filename = 'garden3_left.jpg'
     # load an image and perform the preprocessing
     image = caffe.io.load_image(left_dir + filename)
 
@@ -159,7 +162,7 @@ i = 0
 # go over the right image segments of panaromic scenes
 for filename in os.listdir(right_dir):
 
-    #filename = 'creek1_right.jpg'
+    #filename = 'garden3_right.jpg'
 
     # load an image and perform the preprocessing
     image = caffe.io.load_image(right_dir + filename)
@@ -228,15 +231,109 @@ for filename in os.listdir(right_dir):
     i += 1    
 
 
+i = 0
+# go over the right image segments of panaromic scenes
+for filename in os.listdir(full_dir):
+
+    new_name = filename.split(".")
+
+    if ((len(new_name) > 1) and new_name[1] == 'jpg'):
+        # load an image and perform the preprocessing
+        image = caffe.io.load_image(full_dir + filename)
+
+        transformed_image = transformer.preprocess('data', image)
+        #plt.figure()
+        #plt.imshow(image)
+        #plt.show()
+
+
+        # Classify the image
+        # copy the image data to the memory allocated for the conv net
+        net.blobs['data'].data[...] = transformed_image
+
+        # perform classification
+        output = net.forward()
+        #print "Execution time in GPU mode: ", time.clock() - GPUstart_time, "seconds"
+
+        
+        # Get the activations of the eight layers
+        # data[0] indicates first image in the batch
+        conv1_output = net.blobs['conv1'].data[0]
+        conv2_output = net.blobs['conv2'].data[0]
+        conv3_output = net.blobs['conv3'].data[0]
+        conv4_output = net.blobs['conv4'].data[0]
+        conv5_output = net.blobs['conv5'].data[0]
+        fc6_output = net.blobs['fc6'].data[0]
+        fc7_output = net.blobs['fc7'].data[0]
+        fc8_output = net.blobs['fc8'].data[0]
+
+        """
+        # print the shapes of activations
+        print conv1_output.shape
+        print conv2_output.shape
+        print conv3_output.shape
+        print conv4_output.shape
+        print conv5_output.shape
+        print fc6_output.shape
+        print fc7_output.shape
+        print fc8_output.shape
+        """
+
+        if i == 0:
+            # append the avg activations to the list
+            full_activations.append(np.mean(conv1_output))
+            full_activations.append(np.mean(conv2_output))
+            full_activations.append(np.mean(conv3_output))
+            full_activations.append(np.mean(conv4_output))
+            full_activations.append(np.mean(conv5_output))
+            full_activations.append(np.mean(fc6_output))
+            full_activations.append(np.mean(fc7_output))
+            full_activations.append(np.mean(fc8_output))
+        else:
+            full_activations[0] += np.mean(conv1_output)
+            full_activations[1] += np.mean(conv2_output)
+            full_activations[2] += np.mean(conv3_output)
+            full_activations[3] += np.mean(conv4_output)
+            full_activations[4] += np.mean(conv5_output)
+            full_activations[5] += np.mean(fc6_output)
+            full_activations[6] += np.mean(fc7_output)
+            full_activations[7] += np.mean(fc8_output)
+
+        #if i==0:
+        #    break
+        
+        i += 1    
+
+
+
+
 print "Total Images: ", i
 left_activations = [x/i for x in left_activations]
 print left_activations
 right_activations = [x/i for x in right_activations]
 print right_activations
+full_activations = [x/i for x in full_activations]
+print full_activations
+
 
 plt.figure()
 plt.plot(range(1,9,1), left_activations, 'r--')
 plt.plot(range(1,9,1), right_activations, 'g--')
+
+
+correlation = pearsonr(left_activations, right_activations)
+sig_correlation = np.correlate(left_activations, right_activations)
+mse = []
+for i in range(8):
+    mse.append((np.abs(left_activations[i]-right_activations[i])/np.abs(max(left_activations[i], right_activations[i]))) * 100)
+
+
+print "mse:" , mse
+print "Correlations: ", correlation
+print "Signal correlation: ", sig_correlation
+
+plt.figure()
+plt.plot(range(1,9,1), mse)
 plt.show()
 
 """
