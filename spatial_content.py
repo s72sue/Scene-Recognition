@@ -63,6 +63,10 @@ GPUstart_time = time.clock()
 net.blobs['data'].reshape(1,  # batch size
                            3,  # 3-channel BGR images
                            227, 227)  # image size is 227x227
+                           
+# Load the labels for the places database
+labels_file = caffe_root + 'scene/placesCNN_upgraded/categoryIndex_places205.csv'
+labels = np.loadtxt(labels_file, str, delimiter='\t')                           
 
 
 def forward_pass(filename, db_name):
@@ -98,7 +102,7 @@ def get_activations():
     
     return activations
  
-def process_db(db_name, label_index, opp_index, opt_index=-1):
+def process_db(db_name, label_index, opp_index):
      
     avg_activation = []
     categories = []
@@ -124,8 +128,6 @@ def process_db(db_name, label_index, opp_index, opt_index=-1):
         categories.append(pred_category)
         avg_probability += output_prob.item(label_index)
         opp_probability += output_prob.item(opp_index)
-        if opt_index >= 0:
-            opt_probability = output_prob.item(opt_index)
          
         i += 1
           
@@ -134,9 +136,8 @@ def process_db(db_name, label_index, opp_index, opt_index=-1):
     opp_probability = opp_probability/i
 
     top5_output = top5_output/i
-    top5_output = top5_output.argsort()[::-1][:5]  #reverse sort and take 5 largest items
-    if opt_index >= 0:
-        opt_probability = opt_probability/i         
+    top_inds = top5_output.argsort()[::-1][:5]  #reverse sort and take 5 largest items
+    top5_output = zip(top5_output[top_inds], labels[top_inds])
 
     return avg_activation, categories, avg_probability, opp_probability, top5_output
      
