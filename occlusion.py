@@ -10,6 +10,13 @@ import cPickle as pickle
 from scipy.stats.stats import pearsonr
 import os
 
+
+if len(sys.argv) > 1:
+    fname = sys.argv[1]
+else:
+    print "Require a file to store the output data"
+    exit(0)
+    
 # set the defaults for display
 plt.rcParams['figure.figsize'] = (10,10)   # image size
 plt.rcParams['image.interpolation'] = 'nearest' # show square pixels, don't interpolate
@@ -146,50 +153,6 @@ def occlusion_heatmap(net, image_data, target, square_length=7):
             
     return heat_array
 
-def plot_heat_map(X, heat_array):
-     """Plot which parts of an image are particularly import for the
-    net to classify the image correctly.
-    
-    See paper: Zeiler, Fergus 2013
-    Parameters
-    ----------
-    X : numpy.array
-      The input data, should be of shape (b, c, h, w). Only makes
-      sense with image data.
-    figsize : tuple (int, int)
-      Size of the figure.
-    heat_array : np.array (with same size as image)
-      An 2D np.array that at each point (i, j) contains the predicted
-      probability of the correct class if the image is occluded by a
-      square with center (i, j).
-    
-    Output: Plots
-    -----
-    Figure with 3 subplots: the original image, the occlusion heatmap,
-    and both images super-imposed.
-    """
-    
-    if X.ndim != 3:
-        raise ValueError("This function requires the input data to be of "
-                         "shape (K, H, W), instead got {}".format(x.shape))
-                         
-    for ax in axes.flatten():
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.axis('off')
-        
-    ax = axes
-    img = X.mean()
-    ax[0].imshow(-img, interpolation='nearest', cmap='gray')
-    ax[0].set_title('image')
-    ax[1].imshow(-heat_array, interpolation='nearest', cmap='Reds')
-    ax[1].set_title('critical parts')
-    ax[2].imshow(-img, interpolation='nearest', cmap='gray')
-    ax[2].imshow(-heat_array, interpolation='nearest', cmap='Reds', alpha=0.6)
-    ax[2].set_title('super-imposed') 
-    
-    return plt                   
-
 
 ## Load the image and generate a heat map
 ## load the image
@@ -209,8 +172,20 @@ for filename in os.listdir(db_name):
   
     # create and plot a heatmap
     heat_array = occlusion_heatmap(net, transformed_image, label_index, square_length=9)
-    plt = plot_heat_map(transformed_image, heat_array)
-    plt.show()
     
+    # store the data in a pickle file for easy plot reconstruction
+    # this helps to view the plot without having to run the script again
+    data = {
+            'heat_array': heat_array,
+            'transformed_image': transformed_image,
+            }
+    
+    # fname comes from arguments
+    pickle.dump(data, open(fname, 'wb'))
+    print ("pickle complete")
+    print (fname)
+        
     if i==0:
         break
+      
+      
