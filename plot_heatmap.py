@@ -35,14 +35,15 @@ def plot_heat_map(X, heat_array):
     if X.ndim != 3:
         raise ValueError("This function requires the input data to be of "
                          "shape (K, H, W), instead got {}".format(x.shape))
-                         
+    c, h, w = X.shape   
+    figs, axes = plt.subplots(1, 3, figsize=(w,1*w/3))    
     for ax in axes.flatten():
         ax.set_xticks([])
         ax.set_yticks([])
         ax.axis('off')
         
     ax = axes
-    img = X.mean()
+    img = X.mean(0)
     ax[0].imshow(-img, interpolation='nearest', cmap='gray')
     ax[0].set_title('image')
     ax[1].imshow(-heat_array, interpolation='nearest', cmap='Reds')
