@@ -159,7 +159,7 @@ forestroad_idx = 79
 
 # Process the images in each database
 corr_activations, corr_categories, corr_prob, cf_prob, top5_corr = process_db(corridor_dir, corridor_idx, forestpath_idx)
-forest_activations, forest_categories, forest_prob, fc_prob, top5_forest = process_db(forest_dir, forestpath_idx, corridor_idx, forestroad_idx)
+forest_activations, forest_categories, forest_prob, fc_prob, top5_forest = process_db(forest_dir, forestpath_idx, corridor_idx)
 conf_activations, conf_categories, conf_prob, cocl_prob, top5_conf = process_db(conference_dir, conferenceroom_idx, classroom_idx)
 class_activations, class_categories, class_prob, clco_prob, top5_class = process_db(classroom_dir, classroom_idx, conferenceroom_idx)
 
@@ -178,7 +178,6 @@ print "Categories predicted: ", forest_categories
 print "Activations: ", forest_activations
 print "Probability of forest_path: ", forest_prob
 print "Probability of Corridor: ", fc_prob
-print "Probability of forest road: " 
 print "Top 5 Probability: ", top5_forest
 
 
