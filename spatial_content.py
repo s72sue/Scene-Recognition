@@ -92,42 +92,53 @@ def get_activations():
     activations.append( np.mean( net.blobs['conv3'].data[0] ) )
     activations.append( np.mean( net.blobs['conv4'].data[0] ) )
     activations.append( np.mean( net.blobs['conv5'].data[0] ) )
-    activations.append( np.mean( net.blobs['conv6'].data[0] ) )
-    activations.append( np.mean( net.blobs['conv7'].data[0] ) )
-    activations.append( np.mean( net.blobs['conv8'].data[0] ) )
+    activations.append( np.mean( net.blobs['fc6'].data[0] ) )
+    activations.append( np.mean( net.blobs['fc7'].data[0] ) )
+    activations.append( np.mean( net.blobs['fc8'].data[0] ) )
     
     return activations
  
- def process_db(db_name, label_index):
+def process_db(db_name, label_index, opp_index, opt_index=-1):
      
-     avg_activation = []
-     categories = []
-     avg_probability = 0
-     opp_probability = 0  # opponent's probability predicted by model (avg)
-     i = 0
-     # go over the images in the db
-     for filename in os.listdir(db_name):
-         output = forward_pass(filename)
-         activations = get_activations()
+    avg_activation = []
+    categories = []
+    avg_probability = 0
+    opp_probability = 0  # opponent's probability predicted by model (avg)
+    opt_probability = 0  # an option 3rd category which might be interesting
+    top5_output = np.zeros(205)
+    i = 0
+    # go over the images in the db
+    for filename in os.listdir(db_name):
+        output = forward_pass(filename, db_name)
+        activations = get_activations()
+        
+        if i==0:
+            avg_activation = activations
+        else:
+            avg_activation = [sum(x) for x in zip(avg_activation, activations)]
+        
+        # get the output vector for the first image in the batch 
+        output_prob = output['prob'][0]  
+        top5_output += output_prob
+        pred_category = output_prob.argmax()  
+        categories.append(pred_category)
+        avg_probability += output_prob.item(label_index)
+        opp_probability += output_prob.item(opp_index)
+        if opt_index >= 0:
+            opt_probability = output_prob.item(opt_index)
          
-         if i==0:
-             avg_activation = activations
-         else:
-             avg_activation = [sum(x) for x in zip(avg_activation, activations)]
-         
-         # get the output vector for the first image in the batch 
-         output_prob = output['prob'][0]  
-         pred_category = output_prob.argmax()
-         categories.append(pred_category)
-         avg_probability += output_prob[label_index]
-         opp_probability += opp_probability[opp_index]
-         
-         i += 1
+        i += 1
           
-     avg_activation = [x/i for x in avg_activation]  
-     avg_probability = avg_probability/i
-     opp_probability = opp_probability/i
-     return avg_activation, categories, avg_probability, opp_probability
+    avg_activation = [x/i for x in avg_activation]  
+    avg_probability = avg_probability/i
+    opp_probability = opp_probability/i
+
+    top5_output = top5_output/i
+    top5_output = top5_output.argsort()[::-1][:5]  #reverse sort and take 5 largest items
+    if opt_index >= 0:
+        opt_probability = opt_probability/i         
+
+    return avg_activation, categories, avg_probability, opp_probability, top5_output
      
     
 
@@ -143,39 +154,47 @@ corridor_idx = 54
 forestpath_idx = 78
 conferenceroom_idx = 51
 classroom_idx = 44
+forestroad_idx = 79
 
 # Process the images in each database
-corr_activations, corr_categories, corr_prob, cf_prob = process_db(corridor_dir, corridor_idx, forestpath_idx)
-forest_activations, forest_categories, forest_prob, fc_prob = process_db(forest_dir, forestpath_idx, corridor_idx)
-conf_activations, conf_categories, conf_prob, cocl_prob = process_db(conference_dir, conferenceroom_idx, classroom_idx)
-class_activations, class_categories, class_prob, clco_prob = process_db(classroom_dir, classroom_idx, conferenceroom_idx)
+corr_activations, corr_categories, corr_prob, cf_prob, top5_corr = process_db(corridor_dir, corridor_idx, forestpath_idx)
+forest_activations, forest_categories, forest_prob, fc_prob, top5_forest = process_db(forest_dir, forestpath_idx, corridor_idx, forestroad_idx)
+conf_activations, conf_categories, conf_prob, cocl_prob, top5_conf = process_db(conference_dir, conferenceroom_idx, classroom_idx)
+class_activations, class_categories, class_prob, clco_prob, top5_class = process_db(classroom_dir, classroom_idx, conferenceroom_idx)
 
 
 print "################################# RESULTS #######################################"
 
 print "############################ Corridor db results ############################"
 print "Categories predicted: ", corr_categories
-print print "Activations: ", corr_activations
+print "Activations: ", corr_activations
 print "Probability of Corridor: ", corr_prob
 print "Probability of forest_path: ", cf_prob
+print "Top 5 Probability: ", top5_corr
 
 print "############################ Forest db results ############################"
 print "Categories predicted: ", forest_categories
-print print "Activations: ", forest_activations
+print "Activations: ", forest_activations
 print "Probability of forest_path: ", forest_prob
 print "Probability of Corridor: ", fc_prob
+print "Probability of forest road: " 
+print "Top 5 Probability: ", top5_forest
+
 
 print "############################ Conference room db results ############################"
 print "Categories predicted: ", conf_categories
-print print "Activations: ", conf_activations
+print "Activations: ", conf_activations
 print "Probability of Conference room: ", conf_prob
 print "Probability of Class room: ", cocl_prob
+print "Top 5 Probability: ", top5_conf
+
 
 print "############################ Class room db results ############################"
 print "Categories predicted: ", class_categories
-print print "Activations: ", class_activations
+print "Activations: ", class_activations
 print "Probability of Class room: ", class_prob
 print "Probability of Conference room: ", clco_prob
+print "Top 5 Probability: ", top5_class
 
 
 
