@@ -9,7 +9,7 @@ from PIL import Image
 import cPickle as pickle
 from scipy.stats.stats import pearsonr
 import os
-
+import sys
 
 if len(sys.argv) > 1:
     fname = sys.argv[1]
@@ -75,7 +75,7 @@ labels_file = caffe_root + 'scene/placesCNN_upgraded/categoryIndex_places205.csv
 labels = np.loadtxt(labels_file, str, delimiter='\t') 
 
 
-def occlusion_heatmap(net, image_data, target, square_length=7):
+def occlusion_heatmap(net, x, target, square_length=7):
     """An occlusion test that checks an image for its critical parts.
     In this function, a square part of the image is occluded (i.e. set
     to 0) and then the net is tested for its propensity to predict the
@@ -139,7 +139,7 @@ def occlusion_heatmap(net, image_data, target, square_length=7):
             # x_pad is the new image that needs to be passed through the net         
             # but our input image size is 227*227 so extract the occluded image
             # of the size of original image. Occlusion region is centered at i,j
-            occluded_image = x_pad[:, pad:h, pad:w]
+            occluded_image = x_pad[:, pad:pad+h, pad:pad+w]
             
             # Classify the image
             # copy the image data to the memory allocated for the conv net

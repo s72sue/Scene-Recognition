@@ -55,8 +55,8 @@ def plot_heat_map(X, heat_array):
 
 
 data = pickle.load(open(fname, 'rb')) 
-sigma = data['heat_array']
-output_list = data['transformed_image']
+heat_array = data['heat_array']
+transformed_image = data['transformed_image']
 
 plt = plot_heat_map(transformed_image, heat_array)
 plt.show()
