@@ -10,6 +10,14 @@ import cPickle as pickle
 from scipy.stats.stats import pearsonr
 import os
 
+
+if len(sys.argv) > 1:
+    fname = sys.argv[1]
+else:
+    print "Require a file to store the output data"
+    exit(0)
+    
+    
 # set the defaults for display
 plt.rcParams['figure.figsize'] = (10,10)   # image size
 plt.rcParams['image.interpolation'] = 'nearest' # show square pixels, don't interpolate
@@ -163,38 +171,38 @@ forest_activations, forest_categories, forest_prob, fc_prob, top5_forest = proce
 conf_activations, conf_categories, conf_prob, cocl_prob, top5_conf = process_db(conference_dir, conferenceroom_idx, classroom_idx)
 class_activations, class_categories, class_prob, clco_prob, top5_class = process_db(classroom_dir, classroom_idx, conferenceroom_idx)
 
+### Write the results to a pickle file 
+### so that they can be used later
+data = {
+        'corr_categories': corr_categories,
+        'corr_activations': corr_activations,
+        'corr_prob': corr_prob,
+        'cf_prob': cf_prob,
+        'top5_corr': top5_corr,
+        
+        'forest_categories': forest_categories,
+        'forest_activations': forest_activations,
+        'forest_prob': forest_prob,
+        'fc_prob': fc_prob,
+        'top5_forest': top5_forest,
+        
+        'conf_categories': conf_categories,
+        'conf_activations': conf_activations,
+        'conf_prob': conf_prob,
+        'cocl_prob': cocl_prob,
+        'top5_conf': top5_conf,
+        
+        'class_categories': class_categories,
+        'class_activations': class_activations,
+        'class_prob': class_prob,
+        'clco_prob': clco_prob,
+        'top5_class': top5_class,        
+        }
 
-print "################################# RESULTS #######################################"
+pickle.dump(data, open(fname, 'wb'))
+print ("pickle complete")
+print (fname)
 
-print "############################ Corridor db results ############################"
-print "Categories predicted: ", corr_categories
-print "Activations: ", corr_activations
-print "Probability of Corridor: ", corr_prob
-print "Probability of forest_path: ", cf_prob
-print "Top 5 Probability: ", top5_corr
-
-print "############################ Forest db results ############################"
-print "Categories predicted: ", forest_categories
-print "Activations: ", forest_activations
-print "Probability of forest_path: ", forest_prob
-print "Probability of Corridor: ", fc_prob
-print "Top 5 Probability: ", top5_forest
-
-
-print "############################ Conference room db results ############################"
-print "Categories predicted: ", conf_categories
-print "Activations: ", conf_activations
-print "Probability of Conference room: ", conf_prob
-print "Probability of Class room: ", cocl_prob
-print "Top 5 Probability: ", top5_conf
-
-
-print "############################ Class room db results ############################"
-print "Categories predicted: ", class_categories
-print "Activations: ", class_activations
-print "Probability of Class room: ", class_prob
-print "Probability of Conference room: ", clco_prob
-print "Top 5 Probability: ", top5_class
 
 
 
