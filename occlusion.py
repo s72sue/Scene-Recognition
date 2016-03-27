@@ -171,7 +171,7 @@ for filename in os.listdir(db_name):
     #plt.show()
   
     # create and plot a heatmap
-    heat_array = occlusion_heatmap(net, transformed_image, label_index, square_length=9)
+    heat_array = occlusion_heatmap(net, transformed_image, label_index, square_length=3)
     
     # store the data in a pickle file for easy plot reconstruction
     # this helps to view the plot without having to run the script again
@@ -188,4 +188,5 @@ for filename in os.listdir(db_name):
     if i==0:
         break
       
-      
+execution_time = time.clock() - GPUstart_time
+print "Execution time in GPU mode: ", execution_time, " seconds or ", execution_time/60.0 , " minutes"
