@@ -185,7 +185,8 @@ def occlusion_heatmap(net, x, target, square_length=7):
 #db_name = caffe_root + 'scene/placesCNN_upgraded/testSet_resize/'
 db_name = caffe_root + 'examples/test/'
 label_index = 24
-square_lengths = []
+square_lengths = [9, 13, 23, 39, 51, 87, 113]
+heat_arrdict = {}
 
 i=0
 for filename in os.listdir(db_name):
@@ -198,13 +199,13 @@ for filename in os.listdir(db_name):
     #plt.show()
   
     # create and plot a heatmap
-    #for squares in 
-    heat_array = occlusion_heatmap(net, transformed_image, label_index, square_length=9)
-    
+    for length in square_lengths:
+        heat_array = occlusion_heatmap(net, transformed_image, label_index, square_length=length)
+        heat_arrdict[length] = heat_array
     # store the data in a pickle file for easy plot reconstruction
     # this helps to view the plot without having to run the script again
     data = {
-            'heat_array': heat_array,
+            'heat_arrdict': heat_arrdict,
             'transformed_image': transformed_image,
             }
     
