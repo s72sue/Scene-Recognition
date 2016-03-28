@@ -9,7 +9,7 @@ else:
     print "Require a file containing data to generate the plot"
     exit(0)
 
-def plot_heat_map(X, heat_array):
+def plot_heat_map(X, heat_array, square_length):
     """Plot which parts of an image are particularly import for the
     net to classify the image correctly.
     
@@ -31,12 +31,12 @@ def plot_heat_map(X, heat_array):
     Figure with 3 subplots: the original image, the occlusion heatmap,
     and both images super-imposed.
     """
-    
+
     if X.ndim != 3:
         raise ValueError("This function requires the input data to be of "
                          "shape (K, H, W), instead got {}".format(x.shape))
     c, h, w = X.shape   
-    figs, axes = plt.subplots(1, 3, figsize=(w,1*w/3))    
+    figs, axes = plt.subplots(1, 3, figsize=(w,1*w/3), facecolor='white')   
     for ax in axes.flatten():
         ax.set_xticks([])
         ax.set_yticks([])
@@ -47,17 +47,33 @@ def plot_heat_map(X, heat_array):
     ax[0].imshow(-img, interpolation='nearest', cmap='gray')
     ax[0].set_title('image')
     ax[1].imshow(-heat_array, interpolation='nearest', cmap='Reds')
-    ax[1].set_title('critical parts')
+    ax[1].set_title(('critical parts with square length: ', square_length))
     ax[2].imshow(-img, interpolation='nearest', cmap='gray')
     ax[2].imshow(-heat_array, interpolation='nearest', cmap='Reds', alpha=0.6)
     ax[2].set_title('super-imposed') 
     
-    return plt      
+    return plt  
 
 
-data = pickle.load(open(fname, 'rb')) 
-heat_array = data['heat_array']
+data = pickle.load(open(fname, 'rb'))
 transformed_image = data['transformed_image']
 
-plt = plot_heat_map(transformed_image, heat_array)
-plt.show()
+length_list = []
+heat_avg = []
+
+if 'heat_arrdict' in data:
+    heat_arrdict = data['heat_arrdict']
+    for key, value in heat_arrdict.iteritems():
+        heat_array = value
+        length_list.append(key**2)
+        heat_avg.append(np.mean(heat_array)*100)
+        
+        #plt = plot_heat_map(transformed_image, heat_array, key)
+        #plt.show() 
+    plt.figure(facecolor='white')
+    plt.plot(length_list, heat_avg, 'ro')
+    plt.show()
+else:    
+    heat_array = data['heat_array']
+    plt = plot_heat_map(transformed_image, heat_array)
+    plt.show()
