@@ -10,6 +10,12 @@ import cPickle as pickle
 from scipy.stats.stats import pearsonr
 import os
 
+if len(sys.argv) > 1:
+    fname = sys.argv[1]
+else:
+    print "Require a file to store the output data"
+    exit(0)
+    
 # set the defaults for display
 plt.rcParams['figure.figsize'] = (10,10)   # image size
 plt.rcParams['image.interpolation'] = 'nearest' # show square pixels, don't interpolate
@@ -325,27 +331,6 @@ data = {
 pickle.dump(data, open(fname, 'wb'))
 print ("pickle completer")
 print (fname)
-
-
-plt.figure()
-plt.plot(range(1,9,1), left_activations, 'r--')
-plt.plot(range(1,9,1), right_activations, 'g--')
-
-
-correlation = pearsonr(left_activations, right_activations)
-sig_correlation = np.correlate(left_activations, right_activations)
-mse = []
-for i in range(8):
-    mse.append((np.abs(left_activations[i]-right_activations[i])/np.abs(max(left_activations[i], right_activations[i]))) * 100)
-
-
-print "mse:" , mse
-print "Correlations: ", correlation
-print "Signal correlation: ", sig_correlation
-
-plt.figure()
-plt.plot(range(1,9,1), mse)
-plt.show()
 
 """
 
