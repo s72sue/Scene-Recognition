@@ -3,7 +3,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-
+if len(sys.argv) > 1:
+    fname = sys.argv[1]
+else:
+    print "Require a file containing data to generate the plot"
+    exit(0)
+    
 data = pickle.load(open(fname, 'rb'))
 left_activations = data['left_activations']
 right_activations = data['right_activations']
