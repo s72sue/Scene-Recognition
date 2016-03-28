@@ -315,6 +315,17 @@ print right_activations
 full_activations = [x/i for x in full_activations]
 print full_activations
 
+# store the data in the pickle file
+data = {
+        'left_activations': left_activations,
+        'right_activations': right_activations,
+        'full_activations':full_activations,
+        }
+
+pickle.dump(data, open(fname, 'wb'))
+print ("pickle completer")
+print (fname)
+
 
 plt.figure()
 plt.plot(range(1,9,1), left_activations, 'r--')
