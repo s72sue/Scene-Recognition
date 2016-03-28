@@ -9,6 +9,7 @@ from PIL import Image
 import cPickle as pickle
 from scipy.stats.stats import pearsonr
 import os
+import sys
 
 if len(sys.argv) > 1:
     fname = sys.argv[1]
