@@ -13,8 +13,10 @@ import sys
 
 if len(sys.argv) > 1:
     fname = sys.argv[1]
+    square_length = int(sys.argv[2])
+    label_index = int(sys.argv[3])
 else:
-    print "Require a file to store the output data"
+    print "Require a file to store the output data, square_length and label_index"
     exit(0)
     
 # set the defaults for display
@@ -183,11 +185,12 @@ def occlusion_heatmap(net, x, target, square_length=7):
 ## load the image
 #db_name = caffe_root + 'scene/placesCNN_upgraded/testSet_resize/'
 db_name = caffe_root + 'examples/test/'
-label_index = 24
+
+#label_index = 24
 
 i=0
 for filename in os.listdir(db_name):
-    filename = 'bedroom.jpg'
+    filename = 'ocean1.jpg'
     image = caffe.io.load_image(db_name + filename)
   
     transformed_image = transformer.preprocess('data', image)
@@ -196,7 +199,7 @@ for filename in os.listdir(db_name):
     #plt.show()
   
     # create and plot a heatmap
-    heat_array = occlusion_heatmap(net, transformed_image, label_index, square_length=3)
+    heat_array = occlusion_heatmap(net, transformed_image, label_index, square_length=square_length)
     
     # store the data in a pickle file for easy plot reconstruction
     # this helps to view the plot without having to run the script again
