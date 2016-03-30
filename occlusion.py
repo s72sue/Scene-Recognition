@@ -75,6 +75,7 @@ labels_file = caffe_root + 'scene/placesCNN_upgraded/categoryIndex_places205.csv
 labels = np.loadtxt(labels_file, str, delimiter='\t') 
 
 
+
 def occlusion_heatmap(net, x, target, square_length=7):
     """An occlusion test that checks an image for its critical parts.
     In this function, a square part of the image is occluded (i.e. set
@@ -89,7 +90,6 @@ def occlusion_heatmap(net, x, target, square_length=7):
     this does not really work if images are randomly distorted by the
     batch iterator.
     See paper: Zeiler, Fergus 2013
-
     Parameters
     ----------
     net : NeuralNet instance
@@ -127,9 +127,11 @@ def occlusion_heatmap(net, x, target, square_length=7):
     heat_array = np.zeros((w, h))
     img = x.copy()   # copy the image
     pad = square_length // 2 
-    
+    occluded_images = np.zeros((227, c, w, h), dtype=img.dtype)
+
     # generate occluded images
     for i in range(w):
+        # batch h occluded images for speeding up predictions
         for j in range(h):
             # default constant value is 0, so padding with zeros
             x_pad = np.pad(img, ((0, 0), (pad, pad), (pad, pad)), 'constant')
@@ -139,17 +141,40 @@ def occlusion_heatmap(net, x, target, square_length=7):
             # x_pad is the new image that needs to be passed through the net         
             # but our input image size is 227*227 so extract the occluded image
             # of the size of original image. Occlusion region is centered at i,j
-            occluded_image = x_pad[:, pad:pad+h, pad:pad+w]
+            occluded_images[j] = x_pad[:, pad:pad+h, pad:pad+w]
             
-            # Classify the image
-            # copy the image data to the memory allocated for the conv net
-            net.blobs['data'].data[...] = occluded_image         
+     
+
+        # set the size of the input if different from the default
+        net.blobs['data'].reshape(114,  # batch size
+                                    3,  # 3-channel BGR images
+                                227, 227)  # image size is 227x227
+
+        # Classify the image
+        # copy the image data to the memory allocated for the conv net
+        net.blobs['data'].data[...] = occluded_images[0:114,:,:,:]         
             
-            # perform classification
-            output = net.forward()
-            output_prob = output['prob'][0] 
-            corr_prob = output_prob.item(target)   # probability of true value
+        # perform classification
+        output = net.forward()
+        output_prob = output['prob']
+        for j in range(114):    
+            corr_prob = output_prob[j].item(target)   # probability of true value
             heat_array[i,j] = corr_prob
+
+
+        # set the size of the input if different from the default
+        net.blobs['data'].reshape(113,  # batch size
+                                    3,  # 3-channel BGR images
+                                227, 227)  # image size is 227x227
+
+        net.blobs['data'].data[...] = occluded_images[114:227,:,:,:]       
+        # perform classification
+        output = net.forward()
+        output_prob = output['prob']
+        for j in range(113):    
+            corr_prob = output_prob[j].item(target)   # probability of true value
+            heat_array[i,j+114] = corr_prob
+
             
     return heat_array
 
