@@ -128,6 +128,11 @@ for filename in os.listdir(directory):
             category_list.append(pred_category)
             imoutput_list.append(highest_prob)
         else:
+            # for computing confidence wrt correct category
+            imoutput_list.append(output_prob(category_list[i]))
+            
+            # for computing set to zero confidence
+            """
             if pred_category == category_list[i]:
                 # append to the list of probabilities
                 imoutput_list.append(highest_prob)
@@ -135,7 +140,8 @@ for filename in os.listdir(directory):
                 # the network predicted the wrong answer
                 #print "category mismatch"
                 imoutput_list.append(0)
-    
+            """
+            
     # normalize the probabilities such that they lie from (0,1)
     imoutput_list = np.divide(imoutput_list, max(imoutput_list))
     # elementwise addition of lists
@@ -165,7 +171,7 @@ data = {
         'category_list': category_list
         }
 
-fname = "blurr_data4.p"
+fname = "blurring_corrcategory_result.p"
 pickle.dump(data, open(fname, 'wb'))
 print ("pickle complete")
 print (fname)
