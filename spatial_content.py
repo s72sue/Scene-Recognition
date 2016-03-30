@@ -9,6 +9,7 @@ from PIL import Image
 import cPickle as pickle
 from scipy.stats.stats import pearsonr
 import os
+import sys
 
 
 if len(sys.argv) > 1:
@@ -110,7 +111,7 @@ def get_activations():
     
     return activations
  
-def process_db(db_name, label_index, opp_index):
+def process_db(db_name, label_index, opp_index, activations_matrix):
      
     avg_activation = []
     categories = []
@@ -123,7 +124,8 @@ def process_db(db_name, label_index, opp_index):
     for filename in os.listdir(db_name):
         output = forward_pass(filename, db_name)
         activations = get_activations()
-        
+        activations_matrix[:, i] = activations
+
         if i==0:
             avg_activation = activations
         else:
@@ -165,11 +167,18 @@ conferenceroom_idx = 51
 classroom_idx = 44
 forestroad_idx = 79
 
+# activation matrix is actual (not avg) activations num_images x 8 layers
+corr_activations_matrix = np.zeros((8, 10))
+forest_activations_matrix = np.zeros((8, 10))
+conf_activations_matrix = np.zeros((8, 10))
+class_activations_matrix = np.zeros((8, 10))
+
+
 # Process the images in each database
-corr_activations, corr_categories, corr_prob, cf_prob, top5_corr = process_db(corridor_dir, corridor_idx, forestpath_idx)
-forest_activations, forest_categories, forest_prob, fc_prob, top5_forest = process_db(forest_dir, forestpath_idx, corridor_idx)
-conf_activations, conf_categories, conf_prob, cocl_prob, top5_conf = process_db(conference_dir, conferenceroom_idx, classroom_idx)
-class_activations, class_categories, class_prob, clco_prob, top5_class = process_db(classroom_dir, classroom_idx, conferenceroom_idx)
+corr_activations, corr_categories, corr_prob, cf_prob, top5_corr = process_db(corridor_dir, corridor_idx, forestpath_idx, corr_activations_matrix)
+forest_activations, forest_categories, forest_prob, fc_prob, top5_forest = process_db(forest_dir, forestpath_idx, corridor_idx, forest_activations_matrix)
+conf_activations, conf_categories, conf_prob, cocl_prob, top5_conf = process_db(conference_dir, conferenceroom_idx, classroom_idx, conf_activations_matrix)
+class_activations, class_categories, class_prob, clco_prob, top5_class = process_db(classroom_dir, classroom_idx, conferenceroom_idx, class_activations_matrix)
 
 ### Write the results to a pickle file 
 ### so that they can be used later
@@ -179,24 +188,28 @@ data = {
         'corr_prob': corr_prob,
         'cf_prob': cf_prob,
         'top5_corr': top5_corr,
-        
+        'corr_activations_matrix': corr_activations_matrix,
+
         'forest_categories': forest_categories,
         'forest_activations': forest_activations,
         'forest_prob': forest_prob,
         'fc_prob': fc_prob,
         'top5_forest': top5_forest,
+        'forest_activations_matrix': forest_activations_matrix,
         
         'conf_categories': conf_categories,
         'conf_activations': conf_activations,
         'conf_prob': conf_prob,
         'cocl_prob': cocl_prob,
         'top5_conf': top5_conf,
+        'conf_activations_matrix': conf_activations_matrix,
         
         'class_categories': class_categories,
         'class_activations': class_activations,
         'class_prob': class_prob,
         'clco_prob': clco_prob,
         'top5_class': top5_class,        
+        'class_activations_matrix': class_activations_matrix,
         }
 
 pickle.dump(data, open(fname, 'wb'))
