@@ -87,7 +87,7 @@ def get_activations(dir_name, activation_array, label):
 
     for filename in image_list:
         name = filename.split(".")
-        if len(name) < 2 and flag == 0: # or name[0][0:4] != 'gard':
+        if len(name) < 2 and flag == 0: #or name[0][0:4] != 'gard':
             continue
         elif label == "full":
             figure_seq.append(name[0])
@@ -155,17 +155,18 @@ full_dir = caffe_root + 'examples/panaromic_db/'
 
 # arrays to store avg activations for eight layers
 # for each category
-num_categories = 8
-images_percategory = 5
+#num_categories = 1
+#images_percategory = 5
+num_images = 100
 num_layers = 8
 # define the category sequence
 #category_seq:  ['creek', 'dessert', 'forest', 'farm', 'field', 'football_field', 'garden', 'dock']
 #category_seq =  ['cree', 'dess', 'fore', 'farm', 'fiel', 'foot', 'gard', 'dock']
 
 # k, (i, j)  
-left_activations = np.zeros((num_layers, num_categories * images_percategory))
-right_activations = np.zeros((num_layers, num_categories * images_percategory))
-full_activations = np.zeros((num_layers, num_categories * images_percategory))
+left_activations = np.zeros((num_layers, num_images))
+right_activations = np.zeros((num_layers, num_images))
+full_activations = np.zeros((num_layers, num_images))
 
 full_activations = get_activations(full_dir, full_activations, "full")
 left_activations = get_activations(left_dir, left_activations, "left")
