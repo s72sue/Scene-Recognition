@@ -11,6 +11,8 @@ from scipy.stats.stats import pearsonr
 import os
 import sys
 
+# get the filename, square length and true label 
+# as inputs to perform quick occlution tests 
 if len(sys.argv) > 1:
     fname = sys.argv[1]
     square_length = int(sys.argv[2])
@@ -78,24 +80,22 @@ labels = np.loadtxt(labels_file, str, delimiter='\t')
 
 
 
-def occlusion_heatmap(net, x, target, square_length=7):
-    """An occlusion test that checks an image for its critical parts.
+def occlusion_heatmap(net, x, target, square_length=9):
+    """
+    Function to check which regions of the image are critical for
+    the correct prediction of the convnet. 
     In this function, a square part of the image is occluded (i.e. set
-    to 0) and then the net is tested for its propensity to predict the
-    correct label. One should expect that this propensity shrinks of
-    critical parts of the image are occluded. If not, this indicates
-    overfitting.
-    Depending on the depth of the net and the size of the image, this
-    function may take awhile to finish, since one prediction for each
-    pixel of the image is made.
-    Currently, all color channels are occluded at the same time. Also,
-    this does not really work if images are randomly distorted by the
-    batch iterator.
-    See paper: Zeiler, Fergus 2013
+    to 0) and then the net is tested for its ability to predict the
+    correct label. It is expected that the accuracy of the prediction
+    will decrease if the important parts of the image are occluded.
+    
+    Since one prediction is made at a time, this fucntion is computationally
+    expensive. All color channels are occluded at the same time. 
+
     Parameters
     ----------
-    net : NeuralNet instance
-      The neural net to test.
+    net : Convnet instance
+      The convnet to test.
     x : np.array
       The input data, should be of shape (K, H, W) where K is the no. of channels. 
       H is hegith and W is the width of the image (i.e., number of pixels).
@@ -104,7 +104,7 @@ def occlusion_heatmap(net, x, target, square_length=7):
       The true value of the image (label_index). If the net makes several
       predictions, say 205 classes, this indicates which one to look
       at.
-    square_length : int (default=7)
+    square_length : int (default=9)
       The length of the side of the square that occludes the image.
       Must be an odd number.
     Results
@@ -146,8 +146,9 @@ def occlusion_heatmap(net, x, target, square_length=7):
             occluded_images[j] = x_pad[:, pad:pad+h, pad:pad+w]
             
      
-
-        # set the size of the input if different from the default
+        # I had to split the 227 pixels into 114 and 113 since the gpu 
+        # couldn't take the load of running in batch size of 227.
+        # set the batch size of the input for the first 114 pixels
         net.blobs['data'].reshape(114,  # batch size
                                     3,  # 3-channel BGR images
                                 227, 227)  # image size is 227x227
@@ -164,7 +165,7 @@ def occlusion_heatmap(net, x, target, square_length=7):
             heat_array[i,j] = corr_prob
 
 
-        # set the size of the input if different from the default
+        # set the batch size of the input for the remaining 113 pixels
         net.blobs['data'].reshape(113,  # batch size
                                     3,  # 3-channel BGR images
                                 227, 227)  # image size is 227x227
@@ -177,7 +178,6 @@ def occlusion_heatmap(net, x, target, square_length=7):
             corr_prob = output_prob[j].item(target)   # probability of true value
             heat_array[i,j+114] = corr_prob
 
-            
     return heat_array
 
 
@@ -185,7 +185,6 @@ def occlusion_heatmap(net, x, target, square_length=7):
 ## load the image
 #db_name = caffe_root + 'scene/placesCNN_upgraded/testSet_resize/'
 db_name = caffe_root + 'examples/test/'
-
 #label_index = 24
 
 i=0
