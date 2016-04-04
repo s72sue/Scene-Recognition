@@ -28,7 +28,6 @@ import caffe
 
 # Load the net
 
-
 # get the path to caffe root
 caffe_root = '../'
 
@@ -97,19 +96,10 @@ def get_activations(dir_name, activation_array, label):
         else:
             image_file = filename + '_left.jpg'
 
-        # figure out the category of the image
-        #name = filename.split(".")
-        #name = name[0][0:4]  # get the first four letters of the filename
-        #category = category_seq.index(name)
-       
         
         # load an image and perform the preprocessing
         image = caffe.io.load_image(dir_name + image_file)
-    
         transformed_image = transformer.preprocess('data', image)
-        #plt.figure()
-        #plt.imshow(image)
-        #plt.show()
     
         # Classify the image
         # copy the image data to the memory allocated for the conv net
@@ -139,9 +129,6 @@ def get_activations(dir_name, activation_array, label):
         activation_array[5, i] = np.mean(fc6_output)
         activation_array[6, i] = np.mean(fc7_output)
         activation_array[7, i] = np.mean(fc8_output)
-    
-        #if i==0:
-        #    break
         
         i += 1   
 
@@ -155,15 +142,13 @@ full_dir = caffe_root + 'examples/panaromic_db/'
 
 # arrays to store avg activations for eight layers
 # for each category
-#num_categories = 1
-#images_percategory = 5
 num_images = 100
 num_layers = 8
 # define the category sequence
 #category_seq:  ['creek', 'dessert', 'forest', 'farm', 'field', 'football_field', 'garden', 'dock']
 #category_seq =  ['cree', 'dess', 'fore', 'farm', 'fiel', 'foot', 'gard', 'dock']
 
-# k, (i, j)  
+# Arrays to store activations for all images for 8 layers
 left_activations = np.zeros((num_layers, num_images))
 right_activations = np.zeros((num_layers, num_images))
 full_activations = np.zeros((num_layers, num_images))
