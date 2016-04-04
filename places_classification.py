@@ -120,35 +120,10 @@ for layer_name, param in net.params.iteritems():
     print layer_name + '\t' + str(param[0].data.shape), str(param[1].data.shape)
 
 
-
 ## Visualize sets of rectangular heat maps
 # take an array of shape (n, height, width) or (n, height, width, channel)
 # and Visualize each (height, width) in a grid of size approx sqrt(n) x sqrt(n).
 # data is four dimensional
-def vis_4data_original(data):
-    """
-    Parameters:
-    data: An array of shape (n, height, width, 3) or (n, height, width)
-    Output:
-    A grid of size approx sqrt(n) by sqrt(n) containing each (height, width)
-    """
-
-    # Step1: normalize data for display
-    n = int(np.ceil(np.sqrt(data.shape[0])))
-    padding = (((0, n ** 2 - data.shape[0]),
-        (0, 1), (0, 1))                 # adding some space between filters
-               + ((0, 0),) * (data.ndim - 3))  # the last dimension (if there is one) shouldn't be padded
-    data = np.pad(data, padding, mode='constant', constant_values=1)  # pad with ones (white)
-    
-    # tiling the filters into an image
-    data = data.reshape((n, n) + data.shape[1:]).transpose((0, 2, 1, 3) + tuple(range(4, data.ndim + 1)))
-    data = data.reshape((n * data.shape[1], n * data.shape[3]) + data.shape[4:])
-     
-    fig = plt.figure()
-    fig.patch.set_facecolor('white')
-    plt.imshow(data); plt.axis('off')
-    plt.show()
-
 def vis_4data (data, padsize=1, padval=0, title="Image"):
     """
     Parameters:
@@ -213,11 +188,6 @@ filters = net.params['conv5'][0].data[0, 50:114]
 vis_4data(filters, padval=1, title="FILTERS OF CONV5 - index 50 - 114")
 
 
-# Visualize the output of conv5 (rectified responses of filters, first 36 only)
-output = net.blobs['conv5'].data[0, :36]
-vis_4data(output, padval=1, title="CONV5 OUTPUT = first 36 channels only")
-
-
 # POOL5 OUTPUT
 # Visualize the output of pool5 i.e., the fifth layer
 output = net.blobs['pool5'].data[0]
@@ -240,6 +210,10 @@ plt.plot(feat.flat)
 plt.title("Final probability output")
 plt.show()
 
+# Visualizing a particular feature map from the output of 
+# conv 5 layer. Previously we saw all 256 channels together 
+# but each channel is a 13x13 feature map, so this code 
+# lets us visualize them separately (with more clarity).
 v = np.zeros((13, 13))
 
 m = 0
@@ -266,18 +240,3 @@ plt.show()
 plt.figure()
 plt.imshow(net.blobs['pool5'].data[0][240])
 plt.show()
-
-"""
-# Compute the accuracy 
-accuracy = 0
-num_iterations = 10
-for i in range(num_iterations):
-    # one iteration, images=batch size
-    outputs = net.forward()
-    accuracy += net.blobs['accuracy-top5'].data
-    print outputs
-print ('############################################################') 
-avg_accuracy = accuracy/num_iterations
-print "Accuracy = ", avg_accuracy
-"""
-
