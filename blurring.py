@@ -63,8 +63,9 @@ net.blobs['data'].reshape(1,  # batch size
                            227, 227)  # image size is 227x227
 
 
-# Apply gaussian filtering to the image
-#image_array = misc.imread(caffe_root + 'examples/blurr_db/bedroom.jpg')
+# Apply gaussian filtering to 50 images in the test set using a 
+# gaussin filter with std deviation ranging from 0 to 13 in steps 
+# of 0.5. his results in a total of 1300 images 
 directory = caffe_root + 'scene/placesCNN_upgraded/testSet_resize' 
 category_list = []
 output_list = []  #avg output from all images
@@ -72,10 +73,6 @@ sigma = np.arange(0, 13, 0.5)
 i = 0
 for filename in os.listdir(directory):
     image_array = np.array(misc.imread(directory + '/' + filename))
-
-    #print type(image_array)
-    #print image_array.shape
-
     # stores the output prob of a given image
     imoutput_list = [] 
     for std_devtn in sigma:
