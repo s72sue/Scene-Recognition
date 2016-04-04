@@ -10,15 +10,13 @@ else:
     exit(0)
 
 def plot_heat_map(X, heat_array, square_length):
-    """Plot which parts of an image are particularly import for the
+    """Plot which parts of an image are important for the
     net to classify the image correctly.
     
-    See paper: Zeiler, Fergus 2013
     Parameters
     ----------
     X : numpy.array
-      The input data, should be of shape (b, c, h, w). Only makes
-      sense with image data.
+      The input data, should be of shape (K, H, W). 
     figsize : tuple (int, int)
       Size of the figure.
     heat_array : np.array (with same size as image)
@@ -54,13 +52,19 @@ def plot_heat_map(X, heat_array, square_length):
     
     return plt  
 
-
+# load the heatmap data computed from occlusion.py 
+# for a singel square length (heat_array) or from 
+# occlusion_batch.py for multiple square lengths (heat_arrdict)
 data = pickle.load(open(fname, 'rb'))
 transformed_image = data['transformed_image']
 
-length_list = []
+length_list = []  #square length list
 heat_avg = []
 
+# This plots the effect of area of occluded region
+# on the confidence level of the model. Avg confidence level
+# is computed by taking the mean of each heatmap generated
+# with a particulat square length. 
 if 'heat_arrdict' in data:
     heat_arrdict = data['heat_arrdict']
     for key, value in heat_arrdict.iteritems():
@@ -70,10 +74,13 @@ if 'heat_arrdict' in data:
         
         #plt = plot_heat_map(transformed_image, heat_array, key)
         #plt.show() 
+    
+    # plot the     
     plt.figure(facecolor='white')
     plt.plot(length_list, heat_avg, 'ro')
     plt.show()
-else:    
+else:   
+    # this just plots one heatmap for a single square length
     heat_array = data['heat_array']
     plt = plot_heat_map(transformed_image, heat_array)
     plt.show()
