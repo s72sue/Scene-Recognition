@@ -13,7 +13,7 @@ else:
     exit(0)
 
 
-# plotting the correlation matrix
+# method for plotting the correlation matrix
 def plot_correlation(matrix, title):
     plt.figure(facecolor='white')
     R = corrcoef(matrix)
@@ -35,7 +35,7 @@ left_right = np.concatenate((left_activations, right_activations), axis=0)
 left_full = np.concatenate((left_activations, full_activations), axis=0)
 right_full = np.concatenate((right_activations, full_activations), axis=0)
 
-
+# plotting the correlation coefficient plots
 corr_lr = corrcoef(left_right)
 corr_rf = corrcoef(right_full)
 corr_lf = corrcoef(left_full)
@@ -52,7 +52,7 @@ plt.ylabel("Correlation coefficient", fontsize=16)
 plt.title("left segment and right segment", fontsize=16)
 plt.show()
 
-
+# plotting the correlation matrices
 plot_correlation(left_right, "left and right segments")
 plot_correlation(left_full, "left segment and full image")
 plot_correlation(right_full, "right segment and full image")
@@ -62,8 +62,5 @@ plt.figure()
 plt.plot(range(1,9,1), left_activations, 'r--')
 plt.plot(range(1,9,1), right_activations, 'g--')
 
-
+# print the total number of images
 print "NO OF IMAGES: " , len(right_activations)
-print np.mean(left_activations)
-print np.mean(right_activations)
-
