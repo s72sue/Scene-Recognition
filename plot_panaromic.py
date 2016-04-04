@@ -21,7 +21,7 @@ def plot_correlation(matrix, title):
     colorbar()
     xticks(arange(0.5, 16.5), range(1,17,1))
     yticks(arange(0.5, 16.5), range(1,17,1))
-    plt.title(title)
+    plt.title(title, fontsize=16)
     show()
 
         
@@ -36,43 +36,34 @@ left_full = np.concatenate((left_activations, full_activations), axis=0)
 right_full = np.concatenate((right_activations, full_activations), axis=0)
 
 
-corr = corrcoef(left_right)
+corr_lr = corrcoef(left_right)
+corr_rf = corrcoef(right_full)
+corr_lf = corrcoef(left_full)
+
 x_values = range(1,9,1)
 y_values = []
 for i in range(len(x_values)):
-    y_values.append(corr[i, i+8]) 
+    y_values.append(corr_lr[i, i+8]) 
 
 plt.figure(facecolor="white")
 plt.plot(x_values, y_values)
+plt.xlabel("Layer number", fontsize=16)
+plt.ylabel("Correlation coefficient", fontsize=16)
+plt.title("left segment and right segment", fontsize=16)
 plt.show()
 
 
-plot_correlation(left_right, "left segment and right image")
-#plot_correlation(left_full, "left segment and full image")
-#plot_correlation(right_full, "right segment and full image")
+plot_correlation(left_right, "left and right segments")
+plot_correlation(left_full, "left segment and full image")
+plot_correlation(right_full, "right segment and full image")
 
 
-"""
 plt.figure()
 plt.plot(range(1,9,1), left_activations, 'r--')
 plt.plot(range(1,9,1), right_activations, 'g--')
 
 
-
-correlation = pearsonr(left_activations, right_activations)
-sig_correlation = np.correlate(left_activations, right_activations)
-mse = []
-for i in range(8):
-    mse.append((np.abs(left_activations[i]-right_activations[i])/np.abs(max(left_activations[i], right_activations[i]))) * 100)
-
-
-print "mse:" , mse
-print "Pearson Correlations: ", correlation
-print "Signal correlation: ", sig_correlation
-
-plt.figure(facecolor='white')
-plt.plot(range(1,9,1), mse)
-plt.show()
-
 print "NO OF IMAGES: " , len(right_activations)
-"""
+print np.mean(left_activations)
+print np.mean(right_activations)
+
