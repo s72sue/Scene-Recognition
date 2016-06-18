@@ -74,23 +74,23 @@ net.blobs['data'].reshape(1,  # batch size
 num_images = 100
 num_layers = 8
 
-lconv1_activations = np.zeros((num_images, 96*55*55)
-lconv2_activations = np.zeros((num_images, 256*27*27))
-lconv3_activations = np.zeros((num_images, 384*13*13))
-lconv4_activations = np.zeros((num_images, 384*13*13))
-lconv5_activations = np.zeros((num_images, 256*13*13))
-lfc6_activations = np.zeros((num_images, 4096))
-lfc7_activations = np.zeros((num_images, 4096))
-lfc8_activations = np.zeros((num_images, 205))
+lconv1_activations = np.zeros((96*55*55, num_images)
+lconv2_activations = np.zeros((256*27*27, num_images))
+lconv3_activations = np.zeros((384*13*13, num_images))
+lconv4_activations = np.zeros((384*13*13, num_images))
+lconv5_activations = np.zeros((256*13*13, num_images))
+lfc6_activations = np.zeros((4096, num_images))
+lfc7_activations = np.zeros((4096, num_images))
+lfc8_activations = np.zeros((205, num_images))
 
-rconv1_activations = np.zeros((num_images, 96*55*55))
-rconv2_activations = np.zeros((num_images, 256*27*27))
-rconv3_activations = np.zeros((num_images, 384*13*13,))
-rconv4_activations = np.zeros((num_images, 384*13*13))
-rconv5_activations = np.zeros((num_images, 256*13*13))
-rfc6_activations = np.zeros((num_images, 4096))
-rfc7_activations = np.zeros((num_images, 4096))
-rfc8_activations = np.zeros((num_images, 205))
+rconv1_activations = np.zeros((96*55*55, num_images))
+rconv2_activations = np.zeros((256*27*27, num_images))
+rconv3_activations = np.zeros((384*13*13, num_images))
+rconv4_activations = np.zeros((384*13*13, num_images))
+rconv5_activations = np.zeros((256*13*13, num_images))
+rfc6_activations = np.zeros((4096, num_images))
+rfc7_activations = np.zeros((4096, num_images))
+rfc8_activations = np.zeros((205, num_images))
 
 
 
@@ -157,24 +157,24 @@ def get_activations(dir_name, label):
     
         # add the layer activations to their respective arrays
         if label == "left":
-            lconv1_activations[i,:] = conv1_output 
-            lconv2_activations[i,:] = conv2_output
-            lconv3_activations[i,:] = conv3_output
-            lconv4_activations[i,:]  = conv4_output
-            lconv5_activations[i,:] = conv5_output
-            lfc6_activations[i,:]  = fc6_output
-            lfc7_activations[i,:]  = fc7_output
-            lfc8_activations[i,:] = fc8_output
+            lconv1_activations[:,i] = conv1_output 
+            lconv2_activations[:,i] = conv2_output
+            lconv3_activations[:,i] = conv3_output
+            lconv4_activations[:,i]  = conv4_output
+            lconv5_activations[:,i] = conv5_output
+            lfc6_activations[:,i]  = fc6_output
+            lfc7_activations[:,i]  = fc7_output
+            lfc8_activations[:,i]= fc8_output
 
         elif label == "right":
-            rconv1_activations[i,:]  =  conv1_output
-            rconv2_activations[i,:]  = conv2_output
-            rconv3_activations[i,:] = conv3_output
-            rconv4_activations[i,:]  = conv4_output
-            rconv5_activations[i,:]  = conv5_output
-            rfc6_activations[i,:] = fc6_output
-            rfc7_activations[i,:]  = fc7_output
-            rfc8_activations[i,:]  = fc8_output
+            rconv1_activations[:,i]  =  conv1_output
+            rconv2_activations[:,i]  = conv2_output
+            rconv3_activations[:,i] = conv3_output
+            rconv4_activations[:,i]  = conv4_output
+            rconv5_activations[:,i] = conv5_output
+            rfc6_activations[:,i] = fc6_output
+            rfc7_activations[:,i] = fc7_output
+            rfc8_activations[:,i] = fc8_output
   
     
         #if i==0:
