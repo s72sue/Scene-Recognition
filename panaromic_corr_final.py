@@ -10,6 +10,7 @@ import cPickle as pickle
 from scipy.stats.stats import pearsonr
 import os
 import sys
+np.set_printoptions(threshold='nan')
 
 if len(sys.argv) > 1:
     fname = sys.argv[1]
@@ -62,7 +63,7 @@ transformer.set_channel_swap('data', (2,1,0))
 
 ## GPU classification
 caffe.set_device(0)  # pick the first GPU in case of multiple gpus
-caffe.set_mode_gpu()
+#caffe.set_mode_gpu()
 GPUstart_time = time.clock()
 
 
@@ -74,7 +75,7 @@ net.blobs['data'].reshape(1,  # batch size
 num_images = 100
 num_layers = 8
 
-lconv1_activations = np.zeros((96*55*55, num_images)
+lconv1_activations = np.zeros((96*55*55, num_images))
 lconv2_activations = np.zeros((256*27*27, num_images))
 lconv3_activations = np.zeros((384*13*13, num_images))
 lconv4_activations = np.zeros((384*13*13, num_images))
@@ -122,13 +123,14 @@ def get_activations(dir_name, label):
         # figure out the category of the image
         #name = filename.split(".")
         #name = name[0][0:4]  # get the first four letters of the filename
-        #category = category_seq.index(name)
-       
+        #category = category_seq.index(name) 
         
         # load an image and perform the preprocessing
         image = caffe.io.load_image(dir_name + image_file)
+        #print dir_name + image_file
     
         transformed_image = transformer.preprocess('data', image)
+        #print "TEST22"
         #plt.figure()
         #plt.imshow(image)
         #plt.show()
@@ -136,6 +138,7 @@ def get_activations(dir_name, label):
         # Classify the image
         # copy the image data to the memory allocated for the conv net
         net.blobs['data'].data[...] = transformed_image
+        #print "test 44"
     
         # perform classification
         output = net.forward()
@@ -143,9 +146,11 @@ def get_activations(dir_name, label):
     
         # Get the activations of the eight layers
         # data[0] indicates first image in the batch
+        #print "TEST 11"         
         conv1_output = net.blobs['conv1'].data[0].flatten()
         #print conv1_output.shape
-        #print "###########################################"
+        #print conv1_output
+        #print "within###########################################"
 
         conv2_output = net.blobs['conv2'].data[0].flatten()
         conv3_output = net.blobs['conv3'].data[0].flatten()
@@ -205,9 +210,15 @@ full_dir = caffe_root + 'examples/panaromic_db/'
 #right_activations = np.zeros((num_layers, num_images))
 #full_activations = np.zeros((num_layers, num_images))
 
-#full_activations = get_activations(full_dir, "full")
-left_activations = get_activations(left_dir, "left")
-right_activations = get_activations(right_dir, "right")
+get_activations(full_dir, "full")
+get_activations(left_dir, "left")
+get_activations(right_dir, "right")
+#print "after ######################"
+#print lconv3_activations[60000, 2]
+#print lconv3_activations[5000, 5]
+#print lconv3_activations[2,40]
+#print lconv3_activations[62000, 40]
+
 
 # store the data in the pickle file
 data = {
@@ -234,5 +245,5 @@ data = {
         }
 
 pickle.dump(data, open(fname, 'wb'))
-print ("pickle completer")
+print ("pickle complete")
 print (fname)
